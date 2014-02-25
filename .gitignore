@@ -1,2 +1,2 @@
 # ignore beam files
-.beam
+*.beam
