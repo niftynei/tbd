@@ -8,7 +8,6 @@
 -endif.
 
 %goal: build simple AT command frames
-%{command, }, {option, }, {parameter, }, {device, me | longaddress of destination}
 % me is the local connected xbee
 
 % Components of a frame

@@ -1,10 +1,17 @@
 -module(parser_tests).
 -include_lib("eunit/include/eunit.hrl").
+-include("constants.hrl").
 
 parser_test_() ->
   [test_device(),
   test_binary(),
-  test_checksum()
+  test_checksum(),
+  test_print()
+  ].
+
+test_print() ->
+  [?_assertEqual("7e000408014e4464", parser:print_frame(#frame{at_command="ND"})),
+  ?_assertEqual("7e000508014e4aff5f", parser:print_frame(#frame{at_command="NJ", value=16#FF}))
   ].
 
 test_device() ->
