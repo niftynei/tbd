@@ -47,7 +47,6 @@ hexdigit(C) when C =< 15 ->
     C + $a - 10.
 
 %% Internal API
-
 to_hex(<<>>, Acc) ->
     lists:reverse(Acc);
 to_hex(<<C1:4, C2:4, Rest/binary>>, Acc) ->
