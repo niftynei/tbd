@@ -11,11 +11,21 @@
 %goal: build simple AT command frames
 % me is the local connected xbee
 %% todo: sanitize results with escape chars
+%% todo: add options to datastruct for complex commands
 
 % Components of a frame
 % [?FRAME_DELIMITER, Count, Packet, Checksum]
 build_frame(FrameSpec) ->
-  {Message, Result} = build_packet(FrameSpec#frame.type, FrameSpec),
+  {Message, Result} = case FrameSpec#frame.device of 
+    me -> 
+      build_packet(FrameSpec#frame.type, FrameSpec);
+    _ when FrameSpec#frame.type =:= ?AT_FRAME -> 
+      true = validate_device(get_binary(FrameSpec#frame.device)),
+      build_packet(?AT_REMOTE_FRAME, FrameSpec);
+    _ ->
+      true = validate_device(get_binary(FrameSpec#frame.device)),
+      build_packet(FrameSpec#frame.type, FrameSpec)
+  end,
   case Message of 
     ok ->
       Count = byte_size(Result),
@@ -49,7 +59,13 @@ build_packet(FrameType, FrameSpec) ->
                   get_binary(FrameSpec#frame.value)])};
     ?AT_REMOTE_FRAME ->
       % ?AT_REMOTE_FRAME -> [FrameType, FrameId, Device, DestAddr, ApplyChanges, Command, Value]
-      {error, unimplemented};
+      {ok, iolist_to_binary([<<?AT_REMOTE_FRAME>>,
+                   get_binary(FrameSpec#frame.frame_id),
+                   get_binary(FrameSpec#frame.device),
+                   get_binary(16#FFFE),
+                   get_binary(16#02), % apply changes
+                   get_binary(FrameSpec#frame.at_command),
+                   get_binary(FrameSpec#frame.value)])};
     _ ->
       {error, unsupported_frame_type}
   end.

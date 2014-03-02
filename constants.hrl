@@ -6,7 +6,7 @@
 
 %% API frame names and values
 -define(AT_FRAME, 16#08).
--define(QUEUE_PARAM_VALUE_FRAME, 16#09).
+-define(QUEUE_PARAM_VALUE_FRAME, 16#09). % queues but doesn't apply value
 -define(ZB_TRANSMIT_REQUEST_FRAME, 16#10).
 -define(ZB_EXPLICIT_COMMAND_FRAME, 16#11).
 -define(AT_REMOTE_FRAME, 16#17).
