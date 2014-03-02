@@ -60,8 +60,9 @@ to_hex_int(I, Acc) ->
 to_bin([], Acc) ->
     iolist_to_binary(lists:reverse(Acc));
 to_bin([C1, C2 | Rest], Acc) ->
-    to_bin(Rest, [(dehex(C1) bsl 4) bor dehex(C2) | Acc]).
-
+    to_bin(Rest, [(dehex(C1) bsl 4) bor dehex(C2) | Acc]);
+to_bin([I], Acc) ->
+    to_bin([$0, I | Acc]).
 
 
 %%
@@ -79,6 +80,7 @@ to_hex_test() ->
 to_bin_test() ->
     <<255, 0, 15, 241>> = to_bin("ff000ff1"),
     <<255, 0, 10, 161>> = to_bin("Ff000aA1"),
+    <<1>> = to_bin("1"),
     ok.
 
 to_int_test() ->
