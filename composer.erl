@@ -1,4 +1,4 @@
--module(parser).
+-module(composer).
 -compile(export_all).
 
 -include("constants.hrl").
