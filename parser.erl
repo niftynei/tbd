@@ -53,22 +53,12 @@ build_packet(FrameType, FrameSpec) ->
       {error, unsupported_frame_type}
   end.
 
-%% Valid inputs: binary or hex (as a string) or as a straight hex/int
-get_device(FrameSpec) ->
-  case FrameSpec#frame.device of
-    me ->
-      {ok, me};
-    undefined ->
-      {ok, me};
-    Device when is_list(Device) ->
-      {ok, mochihex:to_bin(Device)};
-    Device when is_binary(Device) ->
-      {ok, Device};
-    Device when is_integer(Device) ->
-      {ok, <<Device:64>>};
-    _ ->
-      {error, device_bad_format}
-  end.
+%% Valid device address is 8 bytes
+validate_device(Device) ->
+    case byte_size(Device) =:= 8 of
+      true -> true;
+      false -> error(invalid_device_addr)
+    end.
 
 %% Get binary value of a parameter
 get_binary(Value) ->
