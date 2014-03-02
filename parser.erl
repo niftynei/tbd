@@ -3,12 +3,14 @@
 
 -include("constants.hrl").
 -ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
 -compile(export_all).
+-else.
+-export([build_frame/1, print_frame/1]).
 -endif.
 
 %goal: build simple AT command frames
 % me is the local connected xbee
+%% todo: sanitize results with escape chars
 
 % Components of a frame
 % [?FRAME_DELIMITER, Count, Packet, Checksum]
