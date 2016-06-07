@@ -22,7 +22,7 @@ frame(_) ->
 
 extract_frame(FrameType, Data) ->
   case FrameType of
-    ?AT_FRAME or ?QUEUE_PARAM_VALUE_FRAME ->
+    ?AT_FRAME->
         [FrameId, Cmd1, Cmd2 | Value] = Data,
           {ok, #frame{type=FrameType,
                       at_command=[Cmd1,Cmd2],
@@ -37,24 +37,24 @@ extract_frame(FrameType, Data) ->
                {options, [{status, Status}]}};
     ?AT_REMOTE_FRAME ->
         [FrameId, Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Dest1, Dest2, CmdOpts, Cmd1, Cmd2 | Value] = Data,
-          Address = list_to_binary([Add1,Add2,Add3,Add5,Add6,Add7,Add8]),
+          Address = list_to_binary([Add1,Add2,Add3, Add4,Add5,Add6,Add7,Add8]),
           {ok, #frame{type=FrameType,
                       at_command=[Cmd1,Cmd2],
                       device=Address,
                       value=Value,
                       frame_id=FrameId}, 
                {options, [{destination_address, [Dest1,Dest2]}, 
-                          {command_options, CmdOpts]}};
+                          {command_options, CmdOpts}]}};
     ?AT_REMOTE_RESPONSE_FRAME ->
         [FrameId, Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Dest1, Dest2, Cmd1, Cmd2, Status | Value] = Data,
-          Address = list_to_binary([Add1,Add2,Add3,Add5,Add6,Add7,Add8]),
+          Address = list_to_binary([Add1,Add2,Add3,Add4,Add5,Add6,Add7,Add8]),
           {ok, #frame{type=FrameType,
                       at_command=[Cmd1,Cmd2],
                       device=Address,
                       value=Value,
                       frame_id=FrameId}, 
                {options, [{destination_address, [Dest1,Dest2]}, 
-                          {status, Status]}};
+                          {status, Status}]}};
     _ ->
       error(frame_type_not_supported)
   end.

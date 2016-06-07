@@ -1,8 +1,7 @@
 -module(composer).
--compile(export_all).
 
 -include("constants.hrl").
--ifdef(TEST).
+-ifdef(EUNIT).
 -compile(export_all).
 -else.
 -export([build_frame/1, print_frame/1]).
