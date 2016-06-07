@@ -1,2 +1,7 @@
 # ignore beam files
 *.beam
+
+.DS_Store
+erlang-serial/
+gen_serial-0.1/
+srly/
