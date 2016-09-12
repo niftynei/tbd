@@ -1,15 +1,15 @@
 -module(composer).
+-include_lib("eunit/include/eunit.hrl").
 
 -include("constants.hrl").
 -ifdef(EUNIT).
 -compile(export_all).
 -else.
--export([build_frame/1, print_frame/1]).
+-export([build_frame/1, print_frame/1, escape_packet/1]).
 -endif.
 
 %goal: build simple AT command frames
 % me is the local connected xbee
-%% todo: sanitize results with escape chars
 %% todo: add options to datastruct for complex commands
 
 % Components of a frame
@@ -18,9 +18,9 @@ build_frame(FrameSpec) ->
   {Message, Result} = case FrameSpec#frame.device of 
     me -> 
       build_packet(FrameSpec#frame.type, FrameSpec);
-    _ when FrameSpec#frame.type =:= ?AT_FRAME -> 
+    _ when FrameSpec#frame.type =:= ?AT_COMMAND_FRAME -> 
       true = validate_device(get_binary(FrameSpec#frame.device)),
-      build_packet(?AT_REMOTE_FRAME, FrameSpec);
+      build_packet(?AT_REMOTE_COMMAND_FRAME, FrameSpec);
     _ ->
       true = validate_device(get_binary(FrameSpec#frame.device)),
       build_packet(FrameSpec#frame.type, FrameSpec)
@@ -33,6 +33,22 @@ build_frame(FrameSpec) ->
     error ->
       {error, Result} 
   end.
+
+%% Escapes control flow characters that occur
+escape_packet(<<?FRAME_DELIMITER, Packet/binary>>) ->
+  escape(Packet,[?FRAME_DELIMITER]);
+escape_packet(Packet) ->
+  error(not_a_packet).
+escape(<<>>, Acc) ->
+  iolist_to_binary(lists:reverse(Acc));
+escape(<<Char:8, Rest/binary>>, Acc) ->
+  case lists:member(Char, [?FRAME_DELIMITER, ?ESCAPE, ?XON, ?XOFF]) of 
+    true ->
+      escape(Rest, [(Char bxor ?ESCAPE_CHAR), ?ESCAPE | Acc]);
+    false -> 
+      escape(Rest, [Char | Acc])
+  end.
+
 
 %% Prints out the frame as a hex string. 
 print_frame(FrameSpec) ->
@@ -50,15 +66,15 @@ checksum(Packet) ->
 
 build_packet(FrameType, FrameSpec) ->
   case FrameType of 
-    ?AT_FRAME ->
-    % ?AT_FRAME -> [FrameType, FrameId, Command, Value]
-      {ok, iolist_to_binary([<<?AT_FRAME>>, 
+    ?AT_COMMAND_FRAME ->
+    % ?AT_COMMAND_FRAME -> [FrameType, FrameId, Command, Value]
+      {ok, iolist_to_binary([<<?AT_COMMAND_FRAME>>, 
                   get_binary(FrameSpec#frame.frame_id), 
                   get_binary(FrameSpec#frame.at_command),
                   get_binary(FrameSpec#frame.value)])};
-    ?AT_REMOTE_FRAME ->
-      % ?AT_REMOTE_FRAME -> [FrameType, FrameId, Device, DestAddr, ApplyChanges, Command, Value]
-      {ok, iolist_to_binary([<<?AT_REMOTE_FRAME>>,
+    ?AT_REMOTE_COMMAND_FRAME ->
+      % ?AT_REMOTE_COMMAND_FRAME -> [FrameType, FrameId, Device, DestAddr, ApplyChanges, Command, Value]
+      {ok, iolist_to_binary([<<?AT_REMOTE_COMMAND_FRAME>>,
                    get_binary(FrameSpec#frame.frame_id),
                    get_binary(FrameSpec#frame.device),
                    get_binary(16#FFFE),

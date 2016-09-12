@@ -6,7 +6,8 @@ composer_test_() ->
   [test_device(),
   test_binary(),
   test_checksum(),
-  test_print()
+  test_print(),
+  test_escape_packet()
   ].
 
 test_print() ->
@@ -30,3 +31,12 @@ test_checksum() ->
   ?_assertEqual(255, composer:checksum(<<0>>)),
   ?_assertEqual(225, composer:checksum(<<256, 5, 5, 5, 5, 10>>))
   ].
+
+test_escape_packet() ->
+  [?_assertEqual(<<"~}1}3}^}]">>, composer:escape_packet(<<?FRAME_DELIMITER, 17,19,?FRAME_DELIMITER, "}">>)),
+  ?_assertEqual(<<"~">>, composer:escape_packet(<<?FRAME_DELIMITER>>)),
+  ?_assertEqual(<<126,22,122>>, composer:escape_packet(<<?FRAME_DELIMITER, 22, 122>>)),
+  ?_assertError(not_a_packet, composer:escape_packet(<<22,122>>)),
+  ?_assertError(not_a_packet, composer:escape_packet(<<>>))
+  ].
+
