@@ -29,7 +29,7 @@ extract_frame(FrameType, Data) ->
                       at_command=[Cmd1,Cmd2],
                       value=Value,
                       frame_id=FrameId}};
-    ?AT_RESPONSE_FRAME ->
+    ?AT_COMMAND_RESPONSE_FRAME ->
         [FrameId, Cmd1, Cmd2, Status | Value] = Data,
           {ok, #frame{type=FrameType,
                       at_command=[Cmd1,Cmd2],
@@ -46,7 +46,7 @@ extract_frame(FrameType, Data) ->
                       frame_id=FrameId}, 
                {options, [{destination_address, [Dest1,Dest2]}, 
                           {command_options, CmdOpts}]}};
-    ?AT_REMOTE_RESPONSE_FRAME ->
+    ?AT_REMOTE_COMMAND_RESPONSE_FRAME ->
         [FrameId, Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Dest1, Dest2, Cmd1, Cmd2, Status | Value] = Data,
           Address = list_to_binary([Add1,Add2,Add3,Add4,Add5,Add6,Add7,Add8]),
           {ok, #frame{type=FrameType,

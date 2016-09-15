@@ -37,8 +37,9 @@ build_frame(FrameSpec) ->
 %% Escapes control flow characters that occur
 escape_packet(<<?FRAME_DELIMITER, Packet/binary>>) ->
   escape(Packet,[?FRAME_DELIMITER]);
-escape_packet(Packet) ->
+escape_packet(_Packet) ->
   error(not_a_packet).
+
 escape(<<>>, Acc) ->
   iolist_to_binary(lists:reverse(Acc));
 escape(<<Char:8, Rest/binary>>, Acc) ->
@@ -104,3 +105,20 @@ get_binary(Value) ->
     _ ->
       {error, bad_format}
   end.
+
+get_binary_from_frame(FrameType, FrameSpec) ->
+    case FrameType of
+        ?AT_COMMAND_FRAME ->
+            {ok, iolist_to_binary([<<?AT_COMMAND_FRAME>>,
+                                   get_binary(FrameSpec#frame.frame_id),
+                                   get_binary(FrameSpec#frame.at_command),
+                                   get_binary(FrameSpec#frame.value)])};
+        ?AT_REMOTE_COMMAND_FRAME ->
+            {ok, iolist_to_binary([<<?AT_REMOTE_COMMAND_FRAME>>,
+                                   get_binary(FrameSpec#frame.frame_id),
+                                   get_binary(FrameSpec#frame.device),
+                                   get_binary(16#FFFE),
+                                   get_binary(16#02), % apply changes
+                                   get_binary(FrameSpec#frame.at_command),
+                                   get_binary(FrameSpec#frame.value)])}
+    end.
